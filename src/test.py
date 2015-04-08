@@ -1,0 +1,11 @@
+# -*- coding: UTF-8 -*-
+fileo=open("E:\\python\\结果.xls")
+try:
+    textdata=fileo.read()
+finally:
+    fileo.close()
+
+fileout=open("E:\\python\\结果-修改后.xls",'w')
+fileout.write(textdata.replace('charset=UTF-8','charset=GBK'))
+fileout.close()
+print(type(textdata))

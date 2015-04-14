@@ -8,7 +8,7 @@ Created on 2015-3-27
 import time
 from readfile import log
 #time.sleep(2)
-log.writeLog(filedata='替换文件开始！')
+log.writeLog(logdata='替换文件开始！')
 try: 
     with open('E:\\python\\结果.xls',encoding='GBK') as sourcefile:
         sourcedata=sourcefile.read()

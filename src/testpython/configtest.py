@@ -5,6 +5,8 @@ Created on 2015年4月20日
 @author: zjc
 '''
 import configparser
+from readfile import tools
+import os
  
 config = configparser.ConfigParser()
 config.read('E:\\python\\parameter.ini')
@@ -12,4 +14,24 @@ config.read('E:\\python\\parameter.ini')
 print (config.sections())
 print (config.get("log","logpath"))
 print (config['dealOGGlog'])
-print (config['dealOGGlog']['trail_split'])
+
+
+file=tools.readconfig('mail', 'attachfile')
+print(file)
+print(os.path.split(file)[1])
+
+str='''系统运行状态：[系统运行结果]
+-------------------------------------
+1.外网OGG状态：[状态1]
+最后处理时间：[trial时间]
+
+-------------------------------------'''
+print (str)
+str=str.replace('[系统运行结果]', '系统运行正常')
+str=str.replace('[状态1]', 'OGG运行正常')
+
+print (str)
+
+
+
+

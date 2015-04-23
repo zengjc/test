@@ -5,21 +5,20 @@ putty工具：psftp
 linux/AIX用户名、密码
 '''  
 import os
-import log
 import datetime
-import config
+import tools
 
 def downloadfile(cmdstr):
     '''
             传入下载命令，通过putty工具进行下载
     '''
-    log.writeLog('传输FTP日志：开始')
+    tools.writeLog('传输FTP日志：开始')
     #更改本地目录到psftp工具的路径
-    localpath=config.readconfig('dealOGGlog', 'localPath')
+    localpath=tools.readconfig('dealOGGlog', 'localPath')
     os.chdir(localpath)
     #下载
     os.system(cmdstr)
-    log.writeLog('传输FTP日志：结束')
+    tools.writeLog('传输FTP日志：结束')
     
 def checkOGGLogfile(trailfiletime,delaydays):
     '''
@@ -31,10 +30,10 @@ def checkOGGLogfile(trailfiletime,delaydays):
     legalday = datetime.datetime.now() - datetime.timedelta(days=delaydays)
     trailfiletime = datetime.datetime.strptime(trailfiletime, '%Y-%m-%d %H:%M:%S')
     if trailfiletime <= legalday:
-        log.writeLog('检查文件完成，检查结果：异常！')
+        tools.writeLog('检查文件完成，检查结果：异常！')
         return 1 #异常，需处理
     else:
-        log.writeLog('检查文件完成，检查结果：正常！')
+        tools.writeLog('检查文件完成，检查结果：正常！')
         return 0 #没问题
         
 def splitOGGlog(filepath,splitstr,splitstrtime=' at '):
@@ -54,22 +53,25 @@ def splitOGGlog(filepath,splitstr,splitstrtime=' at '):
                     trailfilenumber=a_line[a_line.index(splitstr)+len(splitstr):a_line.index(' at ')]
                     trailfiletime=a_line[a_line.index(' at ')+4:-1]
     except:
-        log.writeLog(filepath+'文件不存在啊，赶快处理啊！')
+        tools.writeLog(filepath+'文件不存在啊，赶快处理啊！')
         raise ValueError(filepath+'文件不存在啊，赶快处理啊！')
-    log.writeLog('最后文件序号：'+str(trailfilenumber)+' 最后更新时间：' +str(trailfiletime))
+    tools.writeLog('最后文件序号：'+str(trailfilenumber)+' 最后更新时间：' +str(trailfiletime))
     
     return trailfilenumber,trailfiletime
 
 def getcheckOGGr_i_ba(delaydays):
-    cmdstr=config.readconfig('dealOGGlog', 'cmdStr')
+    '''
+            监控R_I_BA进程
+            返回值：result：0-正常；1-异常 ；
+    '''
+    cmdstr=tools.readconfig('dealOGGlog', 'cmdStr')
     downloadfile(cmdstr)
     
-    trialsplit = config.readconfig('dealOGGlog', 'trailsplit')
-    trailfilepath = config.readconfig('dealOGGlog', 'trailfilepath')
+    trialsplit = tools.readconfig('dealOGGlog', 'trailsplit')
+    trailfilepath = tools.readconfig('dealOGGlog', 'trailfilepath')
     trailfile=splitOGGlog(trailfilepath,trialsplit)
-    print(trailfile)
-    
-    checkOGGLogfile(trailfile[1],delaydays)
+    result=checkOGGLogfile(trailfile[1],delaydays)
+    return result,trailfile[1]
     
     
 if __name__ == '__main__':

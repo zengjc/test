@@ -30,7 +30,7 @@ delaydays = tools.readconfig('dealOGGlog', 'delaydays_r_i_ba')
 oggresult=dealOGGlogfile.getcheckOGGr_i_ba(int(delaydays))
 maildata=maildata.replace('[trial时间]', oggresult[1])
 
-#根据监控结果，编写邮件正文内容
+#根据监控结果，编写邮件正文内容--外网OGG状态
 if oggresult[0] == 0:
     maildata=maildata.replace('[状态1]', 'OGG运行正常')
 else:

@@ -22,3 +22,7 @@ print(type(trailfiletime))
 if trailfiletime <= (datetime.datetime.now() - datetime.timedelta(days=1)):
     print('一天前更新的') 
 print(trailfiletime)
+i=0
+while i<=10:
+     print (i)
+     i=i+1

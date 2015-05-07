@@ -1,0 +1,8 @@
+status: 200
+server: BaseHTTP/0.6 Python/3.4.2
+date: Wed, 06 May 2015 03:27:53 GMT
+content-length: 10
+content-type: text/html; charset=UTF-8
+content-location: http://127.0.0.1:8081/?wordKey=alan2
+
+Hello Alan

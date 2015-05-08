@@ -37,18 +37,22 @@ class Handler( BaseHTTPRequestHandler ):
     def do_POST(self):
         if not self.verifyWeixinHeader():
             return
-        form = cgi.FieldStorage(
-             fp=self.rfile,
-             headers=self.headers,
-             environ={'REQUEST_METHOD':'POST',
-                      'CONTENT_TYPE':self.headers[str('Content-Type')],
-                      })
-        if form.file:      
-            data = form.file.read()   
-            print (data)      
-        else:                          
-            print ("data is None")
-        
+#         form = cgi.FieldStorage(
+#              fp=self.rfile,
+#              headers=self.headers,
+#              
+#              environ={'REQUEST_METHOD':'POST',
+#                       'CONTENT_TYPE':'text/xml', #硬编码
+#                       })
+# #              environ={'REQUEST_METHOD':'POST',
+# #                       'CONTENT_TYPE':self.headers['Content-Type'],
+# #                       })
+#         if form.file:      
+#             data = form.file.read()   
+#             print (data)      
+#         else:                          
+#             print ("data is None")
+        data='<xml><ToUserName><![CDATA[gh_5345c6e1edc8]]></ToUserName>\n<FromUserName><![CDATA[oSioVs2PIRcgjg87qhi3t8oEsA8Q]]></FromUserName>\n<CreateTime>1430984847</CreateTime>\n<MsgType><![CDATA[text]]></MsgType>\n<Content><![CDATA[1]]></Content>\n<MsgId>6146033119142104914</MsgId>\n</xml>'
         self.send_response(200)
         self.end_headers()
 

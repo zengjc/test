@@ -1,0 +1,8 @@
+status: 200
+content-type: text/html; charset=UTF-8
+date: Thu, 07 May 2015 02:55:22 GMT
+content-location: http://127.0.0.1:8082/?wordKey=alan2
+server: BaseHTTP/0.6 Python/3.4.2
+content-length: 35
+
+Hello Alan!这是访问计数器：

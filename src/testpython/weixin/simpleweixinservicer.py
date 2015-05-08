@@ -6,6 +6,10 @@ import threading
 import hashlib
 import cgi
 
+import io,shutil  
+import urllib
+import os, sys
+
 from testpython.weixin import funcIf4weixin
 import imp
 
@@ -52,13 +56,35 @@ class Handler( BaseHTTPRequestHandler ):
 #             print (data)      
 #         else:                          
 #             print ("data is None")
-        data='<xml><ToUserName><![CDATA[gh_5345c6e1edc8]]></ToUserName>\n<FromUserName><![CDATA[oSioVs2PIRcgjg87qhi3t8oEsA8Q]]></FromUserName>\n<CreateTime>1430984847</CreateTime>\n<MsgType><![CDATA[text]]></MsgType>\n<Content><![CDATA[1]]></Content>\n<MsgId>6146033119142104914</MsgId>\n</xml>'
+        data='<xml><ToUserName><![CDATA[{TO_USER}]]></ToUserName>\n<FromUserName><![CDATA[{FROM_USER}]]></FromUserName>\n<CreateTime>{TIME_STEMP}</CreateTime>\n<MsgType><![CDATA[text]]></MsgType>\n<Content><![CDATA[{RESPONSE_CONTENT}]]></Content>\n<MsgId>6146033119142104914</MsgId>\n</xml>'
         self.send_response(200)
         self.end_headers()
+        
+        mpath,margs=urllib.parse.splitquery(self.path)
+        datas = self.rfile.read(int(self.headers['content-length']))
+        print ('datas = ' + str(datas))
+        self.do_action(mpath, datas)
 
-        worker = funcIf4weixin.msgHandler(data)
-        self.wfile.write(worker.response())
+        #worker = funcIf4weixin.msgHandler(data)
+        #self.wfile.write(worker.response())
 
+
+    def do_action(self, path, args):
+        self.outputtxt(str(path) + str(args) )
+
+    def outputtxt(self, content):
+        #指定返回编码
+        enc = "UTF-8"
+        content = content.encode(enc)          
+        f = io.BytesIO()
+        f.write(content)
+        f.seek(0)  
+        self.send_response(200)  
+        self.send_header("Content-type", "text/html; charset=%s" % enc)  
+        self.send_header("Content-Length", str(len(content)))  
+        self.end_headers()  
+        shutil.copyfileobj(f,self.wfile)
+    
     
     def verifyWeixinHeader(self):
         self.receivedParams = self.requestGet()
@@ -84,6 +110,7 @@ class Handler( BaseHTTPRequestHandler ):
         signature = self.receivedParams['signature']
         timestamp = self.receivedParams['timestamp']
         nonce = self.receivedParams['nonce']
+        #都需要加上encode
         wishSignature = self.localSignature(self.TOKEN.encode(encoding='utf_8'), timestamp.encode(encoding='utf_8'), nonce.encode(encoding='utf_8'))
         print (signature, wishSignature)
         return signature == wishSignature

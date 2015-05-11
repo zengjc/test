@@ -16,16 +16,16 @@ import dealOGGlogfile
 import tools
 import sendmail
 #邮件正文模板
-maildata='''系统运行状态：[系统运行结果]
--------------------------------------
-1.外网OGG状态：[状态1]
-最后处理时间：[trial时间]
-
--------------------------------------'''
 
 
 #
 def dojobww():
+    maildata='''系统运行状态：[系统运行结果]
+    -------------------------------------
+    1.外网OGG状态：[状态1]
+    最后处理时间：[trial时间]
+    
+    -------------------------------------'''
     tools.writeLog('----------外网监控任务：开始！----------')
     delaydays = tools.readconfig('dealOGGlog', 'delaydays_r_i_ba')
     oggresult=dealOGGlogfile.getcheckOGGr_i_ba(int(delaydays))

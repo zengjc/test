@@ -12,7 +12,7 @@ import hashlib
 import xml.etree.ElementTree as ET
 import threading
 import tools
-
+import jobww
 RESPONSE_TEXT_TEMPLATE = '''
 <xml>
 <ToUserName><![CDATA[{TO_USER}]]></ToUserName>
@@ -26,6 +26,8 @@ MYURL_STG = 'http://zengjc.eicp.net'
 MYURL_PRD = 'http://218.242.60.232'
 TOKEN = 'zengjingchao_office_stg1'
 
+SPECIAL_CMD = '实时监控结果'
+SPECIAL_USERID = 'oSioVs2PIRcgjg87qhi3t8oEsA8Q'
 
 class Handler( BaseHTTPRequestHandler ):
 
@@ -141,9 +143,13 @@ class msgHandler:
     def responseDict(self):
         responseDict = {}
         try:
-            responseDict['RESPONSE_CONTENT'] = '八哥学语：' + self.dict['Content']
             responseDict['TO_USER'] = self.dict['FromUserName']
             responseDict['FROM_USER'] = self.dict['ToUserName']
+            #如果特定用户发送特定指令，那么就执行特定命令
+            if self.dict['Content'] == SPECIAL_CMD and self.dict['FromUserName'] == SPECIAL_USERID:
+                responseDict['RESPONSE_CONTENT'] = domyjob()
+            else:    
+                responseDict['RESPONSE_CONTENT'] = '八哥学语：' + self.dict['Content']
             responseDict['TIME_STEMP'] = str(unixTimeStamp())
         except:
             pass
@@ -152,6 +158,11 @@ class msgHandler:
 def unixTimeStamp():
     return int(time.mktime(datetime.datetime.now().timetuple()))
 
+def domyjob():
+    tools.writeLog('收到命令，开始干活！')
+    return jobww.dojobww()
+    
+    
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
     

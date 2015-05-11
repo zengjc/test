@@ -51,7 +51,8 @@ class msgHandler:
     def responseDict(self):
         responseDict = {}
         try:
-            responseDict['RESPONSE_CONTENT'] = self.worker.response.encode('UTF-8')
+            #responseDict['RESPONSE_CONTENT'] = self.worker.response.encode('UTF-8')
+            responseDict['RESPONSE_CONTENT'] = self.dict['Content']
             responseDict['TO_USER'] = self.dict['FromUserName']
             responseDict['FROM_USER'] = self.dict['ToUserName']
             responseDict['TIME_STEMP'] = str(timeHelper.unixTimeStamp())

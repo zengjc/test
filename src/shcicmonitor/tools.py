@@ -8,7 +8,7 @@ import configparser
 import time
 import os
 configpath=os.getcwd()+'\\parameter.ini'
-  
+
 def readconfig(field, key):
     cf = configparser.ConfigParser()
     #必须指定字符集，否则容易出错

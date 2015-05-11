@@ -5,7 +5,7 @@ Created on 2015年4月20日
 @author: zjc
 '''
 import configparser
-from readfile import tools
+from shcicmonitor import tools
 import os
  
 config = configparser.ConfigParser()

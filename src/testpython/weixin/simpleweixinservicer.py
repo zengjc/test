@@ -56,35 +56,19 @@ class Handler( BaseHTTPRequestHandler ):
 #             print (data)      
 #         else:                          
 #             print ("data is None")
-        data='<xml><ToUserName><![CDATA[{TO_USER}]]></ToUserName>\n<FromUserName><![CDATA[{FROM_USER}]]></FromUserName>\n<CreateTime>{TIME_STEMP}</CreateTime>\n<MsgType><![CDATA[text]]></MsgType>\n<Content><![CDATA[{RESPONSE_CONTENT}]]></Content>\n<MsgId>6146033119142104914</MsgId>\n</xml>'
+        mpath,margs=urllib.parse.splitquery(self.path)
+        data = self.rfile.read(int(self.headers['content-length']))
+        print ('data = ' + str(data))
+        #data='<xml><ToUserName><![CDATA[{TO_USER}]]></ToUserName>\n<FromUserName><![CDATA[{FROM_USER}]]></FromUserName>\n<CreateTime>{TIME_STEMP}</CreateTime>\n<MsgType><![CDATA[text]]></MsgType>\n<Content><![CDATA[{RESPONSE_CONTENT}]]></Content>\n<MsgId>6146033119142104914</MsgId>\n</xml>'
         self.send_response(200)
         self.end_headers()
         
-        mpath,margs=urllib.parse.splitquery(self.path)
-        datas = self.rfile.read(int(self.headers['content-length']))
-        print ('datas = ' + str(datas))
-        self.do_action(mpath, datas)
+        #self.do_action(mpath, datas)
 
-        #worker = funcIf4weixin.msgHandler(data)
-        #self.wfile.write(worker.response())
+        worker = funcIf4weixin.msgHandler(data)
+        self.wfile.write(worker.response().encode('UTF-8'))
 
 
-    def do_action(self, path, args):
-        self.outputtxt(str(path) + str(args) )
-
-    def outputtxt(self, content):
-        #指定返回编码
-        enc = "UTF-8"
-        content = content.encode(enc)          
-        f = io.BytesIO()
-        f.write(content)
-        f.seek(0)  
-        self.send_response(200)  
-        self.send_header("Content-type", "text/html; charset=%s" % enc)  
-        self.send_header("Content-Length", str(len(content)))  
-        self.end_headers()  
-        shutil.copyfileobj(f,self.wfile)
-    
     
     def verifyWeixinHeader(self):
         self.receivedParams = self.requestGet()
@@ -154,7 +138,7 @@ if __name__ == '__main__':
     try:
         #f = open('TOKENFILE')
         #token = f.read().strip()
-        token = 'zengjingchao17'
+        token = 'zengjingchao_office_stg'
         Handler.TOKEN = token
     except Exception as inst:
         print (inst)

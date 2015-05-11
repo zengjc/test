@@ -6,7 +6,7 @@ Created on 2015-3-27
 @author: zjc
 '''
 import time
-from readfile import log
+from shcicmonitor import log
 logpath='E:\\python\\log\\testpython.log'
 #time.sleep(2)
 log.writeLog('替换文件开始！',logpath)

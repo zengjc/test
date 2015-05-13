@@ -10,5 +10,6 @@ encoding//src/testpython/Datetest.py=UTF-8
 encoding//src/testpython/configtest.py=utf-8
 encoding//src/testpython/djangotest.py=utf-8
 encoding//src/testpython/mail/mailtest2.py=utf-8
+encoding//src/testpython/sched/schedtest.py=utf-8
 encoding//src/testpython/socket/client2.py=utf-8
 encoding//src/testpython/socket/server2.py=utf-8

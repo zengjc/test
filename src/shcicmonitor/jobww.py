@@ -15,17 +15,21 @@ Created on 2015年4月20日
 import dealOGGlogfile
 import tools
 import sendmail
-#邮件正文模板
-
 
 #
 def dojobww():
-    maildata='''系统运行状态：[系统运行结果]
-    -------------------------------------
-    1.外网OGG状态：[状态1]
-    最后处理时间：[trial时间]
-    
-    -------------------------------------'''
+    #邮件正文模板
+    maildata='''系统运行状态：
+[系统运行结果]
+--------------------------
+1.外网OGG状态：
+[状态1]
+OGG最后处理时间：
+[trial时间]
+
+--------------------------
+最后检查时间：
+[检查时间]'''
     tools.writeLog('----------外网监控任务：开始！----------')
     delaydays = tools.readconfig('dealOGGlog', 'delaydays_r_i_ba')
     oggresult=dealOGGlogfile.getcheckOGGr_i_ba(int(delaydays))
@@ -33,15 +37,17 @@ def dojobww():
     
     #根据监控结果，编写邮件正文内容--外网OGG状态
     if oggresult[0] == 0:
-        maildata=maildata.replace('[状态1]', 'OGG运行正常')
+        maildata=maildata.replace('[状态1]', '正常')
     else:
-        maildata=maildata.replace('[状态1]', 'OGG运行异常')
+        maildata=maildata.replace('[状态1]', '异常')
     
     if oggresult[0] == 0:
-        maildata=maildata.replace('[系统运行结果]', '系统运行正常！')
+        maildata=maildata.replace('[系统运行结果]', '全部正常！')
     else:
-        maildata=maildata.replace('[系统运行结果]', '系统运行异常！')
+        maildata=maildata.replace('[系统运行结果]', '发生异常！')
     
+    maildata=maildata.replace('[检查时间]', tools.nowtime())
+    tools.writeLog('外网监控结果：\n' + maildata)
     tools.writeLog('----------外网监控任务：结束！----------')
     return maildata
 

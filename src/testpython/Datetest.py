@@ -4,6 +4,7 @@
 # 引入datetime模块
 #import datetime
 import datetime
+import time
 #计算今天的时间
 today = datetime.date.today()
 #计算昨天的时间  
@@ -20,9 +21,17 @@ trailfiletime = datetime.datetime.strptime(trailfiletimeStr, '%Y-%m-%d %H:%M:%S'
 print(type(trailfiletime))
 #print(time.strptime('%Y-%m-%d %H:%M:%S',trailfiletime))
 if trailfiletime <= (datetime.datetime.now() - datetime.timedelta(days=1)):
-    print('一天前更新的') 
+    print('一天前更新的')
 print(trailfiletime)
 i=0
-while i<=10:
+while i<=3:
      print (i)
      i=i+1
+     
+timenow = datetime.datetime.now()
+timedelay = timenow + datetime.timedelta(seconds=3)
+time.sleep(2)
+if datetime.datetime.now() >= timedelay :
+    print ('时间已过，可以干活')
+else:
+    print ('频率太高！')

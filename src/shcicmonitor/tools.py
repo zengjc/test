@@ -31,7 +31,10 @@ def writeLog(logdata):
     except:
         raise('日志文件不存在或无法打开！！')
 
+def nowtime():
+    return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 
 if __name__ == "__main__":
     writeLog('日志测试！')
     print (readconfig('log','logpath'))
+    print (nowtime())

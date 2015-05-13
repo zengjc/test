@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 '''
 Created on 2015年5月11日
-
+edited on 2015-05-12
 @author: zjc
 '''
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -21,13 +21,18 @@ RESPONSE_TEXT_TEMPLATE = '''
 <MsgType><![CDATA[text]]></MsgType>
 <Content><![CDATA[{RESPONSE_CONTENT}]]></Content>
 </xml>
-'''  
-MYURL_STG = 'http://zengjc.eicp.net'
-MYURL_PRD = 'http://218.242.60.232'
-TOKEN = 'zengjingchao_office_stg1'
+'''
+#MYURL_STG = 'http://zengjc.eicp.net'
+#MYURL_PRD = 'http://218.242.60.232'
+#TOKEN = 'zengjingchao_office_stg1'
 
-SPECIAL_CMD = '实时监控结果'
-SPECIAL_USERID = 'oSioVs2PIRcgjg87qhi3t8oEsA8Q'
+TOKEN = tools.readconfig('weixin', 'TOKEN')
+SPECIAL_CMD = tools.readconfig('weixin', 'SPECIAL_CMD')
+SPECIAL_USERID = tools.readconfig('weixin', 'SPECIAL_USERID')
+#命令最低间隔时间(秒)
+INTERVALTIME = int(tools.readconfig('weixin', 'INTERVALTIME'))
+#最后一次执行命令的时间,在每次执行成功命令后更新
+LASTDONETIME = datetime.datetime.now()
 
 class Handler( BaseHTTPRequestHandler ):
 
@@ -100,7 +105,6 @@ class Handler( BaseHTTPRequestHandler ):
         self.wfile.write(text)
         self.wfile.close()
     
-    
     def send_head(self, text):
         self.send_response(200)
         self.send_header("Content-type", 'text/html')
@@ -114,6 +118,8 @@ class msgHandler:
     def __init__(self, data):
         self.data = data
         self.dict = self._xmlToDict(self.data)
+#         if self.dict['MsgType'] == 'event':
+#             self.worker = eventHandler(self.dict['FromUserName'],self.dict['Event'])
 
     def response(self):
         responseDict = self.responseDict()
@@ -146,22 +152,45 @@ class msgHandler:
             responseDict['TO_USER'] = self.dict['FromUserName']
             responseDict['FROM_USER'] = self.dict['ToUserName']
             #如果特定用户发送特定指令，那么就执行特定命令
-            if self.dict['Content'] == SPECIAL_CMD and self.dict['FromUserName'] == SPECIAL_USERID:
-                responseDict['RESPONSE_CONTENT'] = domyjob()
-            else:    
-                responseDict['RESPONSE_CONTENT'] = '八哥学语：' + self.dict['Content']
+            responseDict['RESPONSE_CONTENT'] = verifycommond(self.dict['FromUserName'],self.dict['Content'])
             responseDict['TIME_STEMP'] = str(unixTimeStamp())
         except:
             pass
         return responseDict
 
+class eventHandler:
+    MSG_WELCOME = '欢迎您关注我，这里是信息中心监控平台！'
+    def __init__(self, user, event):
+        if event == 'subscribe':
+            self.response = self.MSG_WELCOME
+
 def unixTimeStamp():
     return int(time.mktime(datetime.datetime.now().timetuple()))
 
+def verifycommond(fromuserid , usercommond):
+    '''
+    校验发送命令的用户ID和命令，根据命令执行相对于的job
+    返回：查询结果 string类型
+    '''
+    if usercommond == SPECIAL_CMD and '[' + fromuserid + ']' in SPECIAL_USERID:
+        return domyjob()
+    else:
+        return '八哥学语：' + usercommond
+
 def domyjob():
-    tools.writeLog('收到命令，开始干活！')
-    return jobww.dojobww()
-    
+    '''
+    调度后台查询任务，开始干活
+    返回：查询结果 string类型
+    '''
+    global LASTDONETIME
+    # 检查命令间隔时间，如果过于频繁，将不执行命令
+    if datetime.datetime.now() >= LASTDONETIME + datetime.timedelta(seconds=INTERVALTIME):
+        tools.writeLog('收到命令，开始干活！')
+        LASTDONETIME = datetime.datetime.now()
+        return jobww.dojobww()
+    else:
+        tools.writeLog('收到命令，开始干活！')
+        return '抱歉，查询过于频繁，请稍等！'
     
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
@@ -172,6 +201,5 @@ if __name__ == '__main__':
         
     server = ThreadedHTTPServer( server_address, Handler)
     print ('weixin server is running at http://127.0.0.1:' + str(serverPort))
-    #print ('Starting server, use <Ctrl-C> to stop')
     server.serve_forever()
 

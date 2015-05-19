@@ -22,19 +22,20 @@ RESPONSE_TEXT_TEMPLATE = '''
 <Content><![CDATA[{RESPONSE_CONTENT}]]></Content>
 </xml>
 '''
-#MYURL_STG = 'http://zengjc.eicp.net'
-#MYURL_PRD = 'http://218.242.60.232'
-#TOKEN = 'zengjingchao_office_stg1'
+# MYURL_STG = 'http://zengjc.eicp.net'
+# MYURL_PRD = 'http://218.242.60.232'
 
 TOKEN = tools.readconfig('weixin', 'TOKEN')
 SPECIAL_CMD = tools.readconfig('weixin', 'SPECIAL_CMD')
 SPECIAL_USERID = tools.readconfig('weixin', 'SPECIAL_USERID')
-#命令最低间隔时间(秒)
+MONITOR_CMD = tools.readconfig('weixin', 'MONITOR_CMD')
+# 命令最低间隔时间(秒)
 INTERVALTIME = int(tools.readconfig('weixin', 'INTERVALTIME'))
-#最后一次执行命令的时间,在每次执行成功命令后更新
+# 最后一次执行命令的时间,在每次执行成功命令后更新
 LASTDONETIME = datetime.datetime.now()
+MONITOR_RESULT = None
 
-class Handler( BaseHTTPRequestHandler ):
+class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         print (threading.currentThread().getName())
@@ -42,10 +43,10 @@ class Handler( BaseHTTPRequestHandler ):
         text = 'This is a webservice for weixin!\n'
         if self.verifyWeixinHeader():
             if self.path.startswith('/update?'):
-#                 update_function_module()
+                #update_function_module()
                 text = 'updated'
             elif self.path.startswith('/updatelocal?'):
-#                 update_function_module('local')
+                #update_function_module('local')
                 text = 'updated'                
             else:
                 text = self.receivedParams['echostr']
@@ -73,16 +74,15 @@ class Handler( BaseHTTPRequestHandler ):
         signature = self.receivedParams['signature']
         timestamp = self.receivedParams['timestamp']
         nonce = self.receivedParams['nonce']
-        #都需要加上encode
+        # 都需要加上encode
         wishSignature = self.localSignature(TOKEN.encode(encoding='utf_8'), timestamp.encode(encoding='utf_8'), nonce.encode(encoding='utf_8'))
-        #print ('后面俩一致才行：' + signature + '||' + wishSignature)
         return signature == wishSignature
 
     def localSignature(self, token, timestamp, nonce):
         items = [token, timestamp, nonce]
         items.sort()
         sha1 = hashlib.sha1()
-        list(map(sha1.update,items))#
+        list(map(sha1.update, items))  #
         hashcode = sha1.hexdigest()
         return hashcode
 
@@ -109,7 +109,7 @@ class Handler( BaseHTTPRequestHandler ):
         self.send_response(200)
         self.send_header("Content-type", 'text/html')
         fullLength = len(text)
-        tools.writeLog('fullLength, text = ' + str(fullLength) +  str(text))
+        tools.writeLog('fullLength, text = ' + str(fullLength) + str(text))
         self.send_header("Content-Length", str(fullLength))
         self.end_headers()
         return
@@ -151,9 +151,10 @@ class msgHandler:
         try:
             responseDict['TO_USER'] = self.dict['FromUserName']
             responseDict['FROM_USER'] = self.dict['ToUserName']
-            #如果特定用户发送特定指令，那么就执行特定命令
-            responseDict['RESPONSE_CONTENT'] = verifycommond(self.dict['FromUserName'],self.dict['Content'])
+            # 如果特定用户发送特定指令，那么就执行特定命令
+            responseDict['RESPONSE_CONTENT'] = verifycommond(self.dict['FromUserName'], self.dict['Content'])
             responseDict['TIME_STEMP'] = str(unixTimeStamp())
+            
         except:
             pass
         return responseDict
@@ -172,8 +173,20 @@ def verifycommond(fromuserid , usercommond):
     校验发送命令的用户ID和命令，根据命令执行相对于的job
     返回：查询结果 string类型
     '''
+    global MONITOR_RESULT
+    tools.writeLog('收到来自用户' + fromuserid + '的命令：' + usercommond)
     if usercommond == SPECIAL_CMD and '[' + fromuserid + ']' in SPECIAL_USERID:
-        return domyjob()
+        #执行实时查询命令
+        MONITOR_RESULT = domyjob()
+        return MONITOR_RESULT
+    elif usercommond == MONITOR_CMD :
+        print ('在这里！')
+        #如果从未执行过，则执行一次，并一直返回该结果
+        if MONITOR_RESULT == None or '系统运行状态'not in MONITOR_RESULT:
+            MONITOR_RESULT = domyjob()
+        return MONITOR_RESULT
+    elif usercommond == '?':
+        return '输入以下命令查询结果：监控结果'
     else:
         return '八哥学语：' + usercommond
 
@@ -189,7 +202,7 @@ def domyjob():
         LASTDONETIME = datetime.datetime.now()
         return jobww.dojobww()
     else:
-        tools.writeLog('收到命令，开始干活！')
+        tools.writeLog('收到命令过于频繁，停止干活！')
         return '抱歉，查询过于频繁，请稍等！'
     
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
@@ -199,7 +212,7 @@ if __name__ == '__main__':
     serverPort = 80
     server_address = ('', serverPort) 
         
-    server = ThreadedHTTPServer( server_address, Handler)
+    server = ThreadedHTTPServer(server_address, Handler)
     print ('weixin server is running at http://127.0.0.1:' + str(serverPort))
     server.serve_forever()
 

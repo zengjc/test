@@ -7,7 +7,7 @@ Created on 2015年4月20日
 import configparser
 import time
 import os
-configpath = os.getcwd() + '\\parameter.ini'
+configpath = 'E:\\python\\eclipse\\workspace\\testpython\\src\\shcicmonitor\\parameter.ini'
 
 def readconfig(field, key):
     cf = configparser.ConfigParser()

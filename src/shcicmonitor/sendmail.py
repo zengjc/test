@@ -36,7 +36,7 @@ def sendmail(maildata):
     
     smtp = smtplib.SMTP()
     smtp.connect(smtpserver)
-    smtp.login(username, password)
+#     smtp.login(username, password)
     smtp.sendmail(sender, receiver, msgRoot.as_string())
     smtp.quit()
     tools.writeLog('邮件已发送给：' + receiver)

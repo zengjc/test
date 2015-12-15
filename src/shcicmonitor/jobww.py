@@ -62,7 +62,7 @@ OGG最后处理时间：
         maildata = maildata.replace('[网闸同步时间2]', '未找到数据')
     
     # 系统整体运行状态
-    if oggresult[0] and gapresultww[0]:
+    if oggresult[0] == 0 and gapresultww[0] == 0:
         maildata = maildata.replace('[系统运行结果]', '全部正常！')
     else:
         maildata = maildata.replace('[系统运行结果]', '发生异常！')

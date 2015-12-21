@@ -3,6 +3,8 @@
 本程序通过putty工具下载linux/AIX文件，需要提供以下内容：
 putty工具：psftp
 linux/AIX用户名、密码
+modify at 2015-12-21
+增加对ogg日志检查过程的容错
 '''  
 import os
 import datetime
@@ -28,7 +30,12 @@ def checkOGGLogfile(trailfiletime, delaydays):
     # 解析文件，判断最后接收时间是否在可接受范围内
     #
     legalday = datetime.datetime.now() - datetime.timedelta(days=delaydays)
-    trailfiletime = datetime.datetime.strptime(trailfiletime, '%Y-%m-%d %H:%M:%S')
+    try:
+        trailfiletime = datetime.datetime.strptime(trailfiletime, '%Y-%m-%d %H:%M:%S')
+    except:
+        tools.writeLog('检查文件过程异常，检查结果：异常！')
+        return 1  # 异常，需处理
+    
     if trailfiletime <= legalday:
         tools.writeLog('检查文件完成，检查结果：异常！')
         return 1  # 异常，需处理
@@ -54,7 +61,9 @@ def splitOGGlog(filepath, splitstr, splitstrtime=' at '):
                     trailfiletime = a_line[a_line.index(' at ') + 4:-1]
     except:
         tools.writeLog(filepath + '文件不存在啊，赶快处理啊！')
-        raise ValueError(filepath + '文件不存在啊，赶快处理啊！')
+#         raise ValueError(filepath + '文件不存在啊，赶快处理啊！')
+    #不报错，而是返回错误代码
+        return 0000,'OGG日志文件异常'
     tools.writeLog('最后文件序号：' + str(trailfilenumber) + ' 最后更新时间：' + str(trailfiletime))
     
     return trailfilenumber, trailfiletime

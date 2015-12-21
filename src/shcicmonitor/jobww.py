@@ -10,6 +10,8 @@ Created on 2015年4月20日
 
 
 -------------------------------------
+modify on 20151221
+增加OGG日志检查过程的容错处理
 @author: zjc
 '''
 import dealOGGlogfile
@@ -37,7 +39,6 @@ OGG最后处理时间：
     #1 检查外网房源标注OGG运行状态
     delaydays = tools.readconfig('dealOGGlog', 'delaydays_r_i_ba')
     oggresult = dealOGGlogfile.getcheckOGGr_i_ba(int(delaydays))
-    maildata = maildata.replace('[trial时间]', oggresult[1])
     
     #2 检查外网网闸工作状态
     gappathww = tools.readconfig('gap', 'shuiwu_nankang_gap_path')
@@ -48,8 +49,10 @@ OGG最后处理时间：
     #1 外网OGG状态
     if oggresult[0] == 0:
         maildata = maildata.replace('[状态1]', '正常')
+        maildata = maildata.replace('[trial时间]', oggresult[1])
     else:
         maildata = maildata.replace('[状态1]', '异常')
+        maildata = maildata.replace('[trial时间]', '异常')
     #2 外网网闸
     if gapresultww[0] == 0:
         maildata = maildata.replace('[网闸状态2]', '正常')
@@ -76,4 +79,3 @@ OGG最后处理时间：
 if __name__ == '__main__':
     checkresult = dojobww()
     sendmail.sendmail(checkresult)
-

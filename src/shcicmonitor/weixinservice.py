@@ -1,7 +1,8 @@
 # -*- coding: UTF-8 -*-
 '''
 Created on 2015年5月11日
-edited on 2015-05-12
+edited on 2015-12-21
+普通用户可在间隔一段时间，重新获取监控结果
 @author: zjc
 '''
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -31,6 +32,8 @@ SPECIAL_USERID = tools.readconfig('weixin', 'SPECIAL_USERID')
 MONITOR_CMD = tools.readconfig('weixin', 'MONITOR_CMD')
 # 命令最低间隔时间(秒)
 INTERVALTIME = int(tools.readconfig('weixin', 'INTERVALTIME'))
+# 普通用户命令最低间隔时间(秒)
+MONITOR_INTERVALTIME = int(tools.readconfig('weixin', 'MONITOR_INTERVALTIME'))
 # 最后一次执行命令的时间,在每次执行成功命令后更新
 LASTDONETIME = datetime.datetime.now()
 MONITOR_RESULT = None
@@ -174,15 +177,19 @@ def verifycommond(fromuserid , usercommond):
     返回：查询结果 string类型
     '''
     global MONITOR_RESULT
+    global LASTDONETIME
+    # 检查命令间隔时间，如果过于频繁，将不执行命令
     tools.writeLog('收到来自用户' + fromuserid + '的命令：' + usercommond)
+
     if usercommond == SPECIAL_CMD and '[' + fromuserid + ']' in SPECIAL_USERID:
         #执行实时查询命令
         MONITOR_RESULT = domyjob()
         return MONITOR_RESULT
     elif usercommond == MONITOR_CMD :
-        print ('在这里！')
         #如果从未执行过，则执行一次，并一直返回该结果
-        if MONITOR_RESULT == None or '系统运行状态'not in MONITOR_RESULT:
+        #控制普通用户命令最低间隔时间
+        if MONITOR_RESULT == None or '系统运行状态'not in MONITOR_RESULT \
+        or datetime.datetime.now() >= LASTDONETIME + datetime.timedelta(seconds=MONITOR_INTERVALTIME):
             MONITOR_RESULT = domyjob()
         return MONITOR_RESULT
     elif usercommond == '?':
